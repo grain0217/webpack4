@@ -38,7 +38,6 @@ Sass和Less都是CSS预处理器，只能对CSS进行`预处理`，而PostCSS可
 - Autoprefixer 补充浏览器前缀
 - CSS-nano 优化压缩
 - CSS-next 使用未来的CSS语法
-
 ##### extractTextWebpackPlugin
 将样式提取到单独的css文件
 ### 转化es6语法
@@ -46,7 +45,6 @@ Sass和Less都是CSS预处理器，只能对CSS进行`预处理`，而PostCSS可
 ### 全局变量引入问题
 
 ### 图片处理
-
 ##### js import
 需要 file-loader/url-loader
 ##### css
@@ -60,7 +58,7 @@ background url css-loader 支持
 ### 配合优化
 htmlInlineChunkPlugin 提前载入webpack加载代码
 
-### devserver搭建本地开发环境
+### dev-server搭建本地开发环境
 ##### contentbase
 指定html页面所在的目录，默认指向项目的根目录
 ##### publicPath
@@ -86,6 +84,22 @@ proxy: {
 - 模块热更新
   - hot: true
   - webpack.HotModuleReplacementPlugin
-- souceMap 帮助调试
+### express + webpack-dev-middleware 搭建本地开发
+### 开发调试
+##### devtool
+webpack官方文档中介绍了几种取值，不同的值会影响到构建和重新构建的速度
 
-3. express + webpack-dev-middleware
+[具体区别](https://segmentfault.com/a/1190000008315937)
+- eval
+- source-map
+- eval-source-map
+
+  不产生map，但是显示行列
+- cheap-source-map
+
+- cheap-module-source-map
+
+  不产生列，产生map
+- cheap-module-eval-source-map
+
+  不产生列,不产生map，集成在打包后的文件中，

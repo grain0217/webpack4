@@ -7,10 +7,11 @@ const webpack = require('webpack')
 
 console.log(path.resolve(__dirname))
 module.exports = {
-  mode: 'development',
-  // mode: 'production',
+  // mode: 'development',
+  mode: 'production',
   entry: {
-    home: './src/index.js',
+    // home: './src/index.js',
+    home: './src/debug.js'
   },
   output: {
     // 打包后的文件名
@@ -27,6 +28,7 @@ module.exports = {
     // 如项目中有模块已经来源于外部依赖(cdn等)，不需要将这些import的包打包到bundle中
     jquery: '$'
   },
+  devtool: 'source-map',
   devServer: {
     port: 3000,
     progress: true,
@@ -105,13 +107,14 @@ module.exports = {
   },
   optimization: {
     // 只在production模式下有效
-    minimizer: [
-      new UglifyJsPlugin({
-        // parallel: true,
-        // sourceMap: true,
-      }),
-      new OptimizeCssAssetsPlugin()
-    ]
+    // sourceMap与minimizer冲突，导致sourceMap无效
+    // minimizer: [
+    //   new UglifyJsPlugin({
+    //     // parallel: true,
+    //     // sourceMap: true,
+    //   }),
+    //   new OptimizeCssAssetsPlugin()
+    // ]
   },
   plugins: [
     new HtmlWebpackPlugin({
