@@ -1,5 +1,10 @@
 @import './a.css';
 
 body {
+  margin: 100px;
+  padding: 300px;
   background-color: aquamarine;
+  /* transform: rotate(90deg); */
+  /* css-loader支持 */
+  background-image: url('./assets/icon.png');
 }

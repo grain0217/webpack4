@@ -9,10 +9,13 @@ console.log(path.resolve(__dirname))
 module.exports = {
   mode: 'development',
   // mode: 'production',
-  entry: './src/index.js',
+  entry: {
+    home: './src/index.js',
+  },
   output: {
     // 打包后的文件名
     filename: 'bundle.[hash].js',
+    // publicPath: 'guyu',
     path: path.resolve(__dirname, 'dist'), // 必须是一个绝对路径
   },
   resolve: {
@@ -27,6 +30,7 @@ module.exports = {
   devServer: {
     port: 3000,
     progress: true,
+    // publicPath: '',
     contentBase: './dist',
     overlay: true,
     compress: true,
@@ -42,7 +46,9 @@ module.exports = {
             // 在文件大小（单位 byte）低于指定的限制时，可以返回一个 DataURL。
             // limit: 200*1024,
             limit: 1,
-            outputPath: 'img/'
+            // outputPath: '/img/',
+            // 当只为部分资源指定CDN地址时
+            // publicPath: ''
           },
         }
       },
@@ -111,6 +117,8 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: './src/index.html',
       title: '测试title',
+      // 对于多页应用，指定每个入口对应的需要的chunk
+      // chunks: [],
       // 打包后的html文件名
       filename: 'index.html',
       // 对打包生成的HTML进行压缩
@@ -126,6 +134,7 @@ module.exports = {
       inject: 'body', // 'body' | true | false
     }),
     new MiniCssExtractPlugin({
+      // filename: '/css/main.css'
       filename: 'main.css'
     }),
     // 自动加载模块，而不必到处 import 或 require
