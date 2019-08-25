@@ -1,0 +1,41 @@
+Arguments: 
+  /Users/guyu/.nvm/versions/node/v12.3.1/bin/node /Users/guyu/.nvm/versions/node/v12.3.1/bin/yarn add webpack webpack-cli =D
+
+PATH: 
+  /Users/guyu/.npm-global/bin:/Users/guyu/.nvm/versions/node/v12.3.1/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+
+Yarn version: 
+  1.16.0
+
+Node version: 
+  12.3.1
+
+Platform: 
+  darwin x64
+
+Trace: 
+  Error: http://r.cnpmjs.org/=D: [not_found] document not found
+      at Request.params.callback [as _callback] (/Users/guyu/.nvm/versions/node/v12.3.1/lib/node_modules/yarn/lib/cli.js:66091:18)
+      at Request.self.callback (/Users/guyu/.nvm/versions/node/v12.3.1/lib/node_modules/yarn/lib/cli.js:129590:22)
+      at Request.emit (events.js:200:13)
+      at Request.<anonymous> (/Users/guyu/.nvm/versions/node/v12.3.1/lib/node_modules/yarn/lib/cli.js:130562:10)
+      at Request.emit (events.js:200:13)
+      at Gunzip.<anonymous> (/Users/guyu/.nvm/versions/node/v12.3.1/lib/node_modules/yarn/lib/cli.js:130484:12)
+      at Object.onceWrapper (events.js:288:20)
+      at Gunzip.emit (events.js:205:15)
+      at endReadableNT (_stream_readable.js:1137:12)
+      at processTicksAndRejections (internal/process/task_queues.js:84:9)
+
+npm manifest: 
+  {
+    "name": "webpack4",
+    "version": "1.0.0",
+    "main": "index.js",
+    "license": "MIT"
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
