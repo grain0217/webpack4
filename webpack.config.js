@@ -3,6 +3,9 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin')
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
+const webpack = require('webpack')
+
+console.log(path.resolve(__dirname))
 module.exports = {
   mode: 'development',
   // mode: 'production',
@@ -11,6 +14,15 @@ module.exports = {
     // 打包后的文件名
     filename: 'bundle.[hash].js',
     path: path.resolve(__dirname, 'dist'), // 必须是一个绝对路径
+  },
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, 'src')
+    }
+  },
+  externals: {
+    // 如项目中有模块已经来源于外部依赖(cdn等)，不需要将这些import的包打包到bundle中
+    jquery: '$'
   },
   devServer: {
     port: 3000,
@@ -22,15 +34,17 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.js$/,
-        include: path.resolve(__dirname, 'src'),
-        exclude: '/node_modules',
+        test: /\.(png|jpg|jpeg|gif)$/,
+        // use: 'file-loader'
         use: {
-          loader: 'eslint-loader',
+          loader: 'url-loader',
           options: {
-            enforce: 'pre', //
-          }
-        },
+            // 在文件大小（单位 byte）低于指定的限制时，可以返回一个 DataURL。
+            // limit: 200*1024,
+            limit: 1,
+            outputPath: 'img/'
+          },
+        }
       },
       {
         test: /\.js$/,
@@ -46,8 +60,14 @@ module.exports = {
                 '@babel/plugin-transform-runtime'
               ]
             }
+          },
+          {
+            loader: 'eslint-loader',
+            options: {
+              enforce: 'pre', //
+            }
           }
-        ]
+        ],
       },
       {
         test: /\.css$/,
@@ -107,6 +127,10 @@ module.exports = {
     }),
     new MiniCssExtractPlugin({
       filename: 'main.css'
+    }),
+    // 自动加载模块，而不必到处 import 或 require
+    new webpack.ProvidePlugin({
+      $: 'jquery'
     })
   ]
 }
