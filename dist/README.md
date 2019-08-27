@@ -8,7 +8,6 @@
 如果webpack生成的哈希更改，manifest也会更改。结果就是，供应商包的内容发生变化，并变为无效。通过将manifest 提取为一个文件或将其内联写入项目的index.html，则可以消除该问题。
 
 ### output
-
 1. path
 一个对应打包输出的绝对路径
 2. filename
@@ -56,6 +55,38 @@ Sass和Less都是CSS预处理器，只能对CSS进行`预处理`，而PostCSS可
 ### 处理js语法以及eslint
 
 ### 全局变量引入问题
+##### 通过expose-loader
+- 内联loader
+```javascript
+import $ from 'expose-loader?$!jquery'
+```
+- 配置loader
+```javascript
+rules: [
+  {
+    test: require.resolve('jquery'), // 表示只要引用了jQuery就能匹配到
+    use: 'expose-loader?$'
+  }
+]
+```
+##### 通过webpack.ProvidePlugin
+在任何js模块中,可以直接使用$而不必require:
+```javascript
+plugins: [
+  new webpack.ProvidePlugin({
+    '$': 'jquery'
+  })
+]
+```
+##### 通过cdn
+由于资源从来自外部，需要配置解决重复打包浪费空间的问题：
+```javascript
+module.exports = {
+  externals: {
+    'jquery': '$'
+  }
+}
+```
 
 ### 图片处理
 ##### js import

@@ -1,9 +1,11 @@
 const path = require('path')
+const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin')
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
-const webpack = require('webpack')
+const { CleanWebpackPlugin } = require('clean-webpack-plugin')
+const CopyWebpackPlugin = require('copy-webpack-plugin')
 
 console.log(path.resolve(__dirname))
 module.exports = {
@@ -143,6 +145,14 @@ module.exports = {
     // 自动加载模块，而不必到处 import 或 require
     new webpack.ProvidePlugin({
       $: 'jquery'
-    })
+    }),
+    new CleanWebpackPlugin(),
+    new CopyWebpackPlugin([
+      {
+        from: path.resolve(__dirname, 'README.md'),
+        to: path.resolve(__dirname, 'dist')
+      }
+    ]),
+    new webpack.BannerPlugin('author: grain0217')
   ]
 }
