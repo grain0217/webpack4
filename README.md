@@ -79,22 +79,34 @@ background url css-loader 支持
 - https
 - 在浏览器中显示编译错误
 
-##### proxy
+##### 跨域问题
  ```javascript
 proxy: {
   '/api': {
-    changeOrigin: true,
-    target: ''
-    // pathRewrite: {}
+    target: 'http://localhost:8000'
+    pathRewrite: {
+      '^/api': ''
+    }
   }      
 }
  ```
+请求到 `/api/user` 会被代理到请求 `http://localhost:/user`
 
-- 模块热更新
+也可以借助 `before` 在 `webpack-dev-serve` 静态资源中间件处理之前, 拦截部分请求返回特定内容, 实现简单的数据 `mock`:
+```javascript
+proxy: {
+  before (app) {
+    app.get('/api/user', (res, req) => {
+      res.json({name: 'grain0217', gender: 'male'})
+    })
+  }
+}
+```
+另一种方式是通过 `wepack-dev-middleware`，使服务端和前端作为一个服务启动，也就不存在跨域问题了。
+
+##### 模块热更新
   - hot: true
   - webpack.HotModuleReplacementPlugin
-
-### express + webpack-dev-middleware 搭建本地开发
 
 ### 开发调试
 ##### devtool

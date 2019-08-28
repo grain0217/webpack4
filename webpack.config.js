@@ -9,11 +9,11 @@ const CopyWebpackPlugin = require('copy-webpack-plugin')
 
 console.log(path.resolve(__dirname))
 module.exports = {
-  // mode: 'development',
-  mode: 'production',
+  mode: 'development',
+  // mode: 'production',
   entry: {
-    // home: './src/index.js',
-    home: './src/debug.js'
+    home: './src/index.js',
+    // home: './src/debug.js'
   },
   output: {
     // 打包后的文件名
@@ -38,6 +38,9 @@ module.exports = {
     contentBase: './dist',
     overlay: true,
     compress: true,
+    proxy: {
+      '/api': 'http://localhost:8000'
+    },
   },
   module: {
     rules: [
