@@ -1,0 +1,1 @@
+{"version":3,"sources":["webpack:///./src/index.sass"],"names":[],"mappings":";AAAA;AACA,kBAAkB;AAClB;AACA;AACA,sCAAsC","file":"main.css","sourcesContent":["html {\n  font-size: 30px; }\n  html h4 {\n    -webkit-transform: rotate(180deg);\n            transform: rotate(180deg); }\n"],"sourceRoot":""}
