@@ -12,13 +12,12 @@ module.exports = {
   mode: 'development',
   // mode: 'production',
   entry: {
-    home: './src/index.js',
-    // home: './src/debug.js'
+    // home: './src/index.js',
+    main: './src/react.js'
   },
   output: {
     // 打包后的文件名
     filename: 'bundle.[hash].js',
-    // publicPath: 'guyu',
     path: path.resolve(__dirname, 'dist'), // 必须是一个绝对路径
   },
   resolve: {
@@ -73,10 +72,13 @@ module.exports = {
           {
             loader: 'babel-loader',
             options: {
-              presets: ['@babel/preset-env'],
+              presets: [
+                '@babel/preset-env',
+                '@babel/preset-react'
+              ],
               plugins: [
                 '@babel/plugin-proposal-class-properties',
-                '@babel/plugin-transform-runtime'
+                '@babel/plugin-transform-runtime',
               ]
             }
           },
@@ -155,13 +157,17 @@ module.exports = {
     new webpack.ProvidePlugin({
       $: 'jquery'
     }),
-    new CleanWebpackPlugin(),
+    // new CleanWebpackPlugin(),
     new CopyWebpackPlugin([
       {
         from: path.resolve(__dirname, 'README.md'),
         to: path.resolve(__dirname, 'dist')
       }
     ]),
-    new webpack.BannerPlugin('author: grain0217')
+    new webpack.BannerPlugin('author: grain0217'),
+    new webpack.DllReferencePlugin({
+      context: __dirname,
+      manifest: require('./dist/dll/react.manifest.json')
+    })
   ]
 }
