@@ -14,7 +14,7 @@
 #### filename
 - 对于单入口，filename 是一个静态名称
 - 当通过多个入口、代码拆分或各种插件创建多个bundle时，可以通过`name|chunkId|hash|chunkHash`为每个bundle命名
-```javascript
+```js
 {
   output: {
     filename: [name].bundle.js
@@ -28,18 +28,82 @@
 ---
 ## 样式处理
 #### style-loader
-将css-loader打包好的css代码以`<style>`标签的形式插入到html文件中
+将css-loader打包好的css代码以`<style>`标签的形式插入到html文件中：
+```js
+{
+  module: {
+    rules: [
+      {
+        test: /\.css$/,
+        use: [
+          {
+            loader: 'style-loader',
+            options: {
+              insert: 'body', // head | body | function
+              injectType: 'singletonStyleTag', // styleTag | singletonStyleTag | lazyStyleTag | linkTag
+              attributes: {
+                name: 'balabala'
+              },
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
+```
 #### css-loader
 使你能够使用类似`@import`和`url(…)`的方法实现引入CSS代码块的功能
 #### sass-loader
-处理sass文件
+处理sass文件：
+```js
+{
+  module: {
+    rules: [
+      {
+        test: /\.sass$/,
+        use: ['style-loader', 'css-loader', 'sass-loader']
+      }
+    ]
+  }
+}
+```
 #### PostCss
 Sass和Less都是CSS预处理器，只能对CSS进行`预处理`，而PostCSS可以对CSS进行`后处理`，所谓的后处理就是对原生的CSS进行一定的修改增强
-- Autoprefixer 补充浏览器前缀
-- CSS-nano 优化压缩
-- CSS-next 使用未来的CSS语法
-#### extractTextWebpackPlugin
-将样式提取到单独的css文件
+- autoprefixer 补充浏览器前缀
+- css-nano 优化压缩
+- css-next 使用未来的CSS语法
+#### MiniCssExtractPlugin
+webpack 4之前推荐`ExtractTextWebpackPlugin`将样式提取到单独的css文件，在webpack 4中被`MiniCssExtractPlugin`替代：
+```js
+// const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+{
+  module: {
+    rules: [
+      {
+        test: /\.sass$/,
+        use: [
+          {
+            loader: MiniCssExtractPlugin.loader,
+            options: {
+              publicPath: '', // 默认是 output.publicPath
+            }
+          },
+          'css-loader',
+          'sass-loader'
+        ]
+      }
+    ]
+  },
+  plugins: [
+    new MiniCssExtractPlugin({
+      filename: '[name].css',
+      chunkFilename: '[id].css'
+    })
+  ]
+}
+```
+一般在开发环境使用`style-loader`，生产中使用`MiniCssExtractPlugin`，两者不能同时出现在`loader`链中。
 
 ---
 ## JS处理
@@ -48,7 +112,7 @@ Sass和Less都是CSS预处理器，只能对CSS进行`预处理`，而PostCSS可
 #### 全局变量引入问题
 #### noParse
 使 webpack 忽略对部分`没有采用模块化`（即）的文件进行依赖的递归解析处理，例如jQuery、lodash等体积大而又没有其他包依赖的库：
-```javascript
+```js
 {
   module: {
     noParse: /jquery|lodash/,
@@ -68,71 +132,64 @@ background url css-loader 支持
 ---
 ## 开发中使用的插件
 #### HtmlWebpackPlugin
-自动生成一个 html 文件，服务于webpack bundle，并且自动引用相关的 assets 文件(如 css, js)
+自动生成一个 html 文件，服务于webpack bundle，并且自动引用相关的 assets 文件(如 css, js)：
+```js
+// const HtmlWebpackPlugin = require('html-webpack-plugin')
+
+{
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: './src/index.html',
+      title: '测试title',
+      // 对于多页应用，指定每个入口对应的需要的chunk
+      // chunks: [],
+      // 打包后的html文件名
+      filename: 'index.html',
+      // 对打包生成的HTML进行压缩
+      minify: {
+        // 删除双引号
+        removeAttributeQuotes: true,
+        // 折叠空格、换行等空白符
+        collapseWhitespace: true,
+      },
+      // 是否为所有注入的静态资源添加webpack每次编译产生的唯一hash值
+      // hash: true,
+      // 指定assets插入的位置
+      inject: 'body', // 'body' | true | false
+    }),
+  ]
+}
+```
 #### cleanWebpackPlugin
-用于在下一次打包时清除之前打包的文件
+用于在下一次打包时清除之前打包的文件：
+```js
+// const { CleanWebpackPlugin } = require('clean-webpack-plugin')
+{
+  plugins: [
+    new CleanWebpackPlugin()
+  ]
+}
+```
 #### copyWebpckPlugin
 拷贝部分文件或指定整个目录到build路径下
 #### bannerPlugin
 为每个 chunk 文件头部添加 版权声明
 #### webpack.IgnorePlugin
 用于指定忽略某些特定模块，使webpack不把这些指定模块打包进去，如第三方库`moment`，打包的时候关于多国语言的配置文件`locale`会被引入，导致打包文件很大：
-```
+```js
 {
   plugins: [
     new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/)
   ]
 }
 ```
-#### dllPlugin
-webpack官方推荐使用`SplitChunksPlugin`(`webpack 4` 之前是`CommonsChunkPlugin`)来分离第三方库，但是使用`SplitChunksPlugin`会有一个问题——每次构建的时候都会重新打包，而一般来说除了更新版本第三方库的代码很少变动，这无疑增加了webpack的打包时间，因此需要使用`DLLPlugin`(Dynamic Link Library)把复用性较高的第三方模块打包到动态链接库中，每次构建只重新打包业务代码。
-使用`dll`时，可以把构建过程分成`dll`构建过程和主构建过程，`DLLPlugin`需要配合`DLLReferencePlugin`使用。
-`dll`构建过程：
-```javascript
-// webpack.dll.confid.js
-{
-  output: {
-    filename: '[name].dll.js',
-    path: path.resolve(__dirname, 'dist/dll'),
-    library: '[name]_dll_[hash]'
-  },
-  plugins: [
-    new webpack.DllPlugin({
-      name: '[name]_dll_[hash]',
-      // 动态链接库的全局变量名称，需要和 output.library 中保持一致
-      // 该字段的值也就是输出的 manifest.json 文件 中 name 字段的值
-      path: path.join(__dirname, 'dist', '[name].manifest.json')
-      // 描述动态链接库的 manifest.json 文件输出时的文件名称
-    })
-  ]
-}
-```
-在主构建配置文件中使用动态库文件，通过`DllReferencePlugin`引用`dll`的`manifest`文件来把依赖的名称映射到模块的`id`上，之后在需要的时候通过内置的`webpack_require`来引入：
-```javascript
-{
-  plugins: [
-    new webpack.DllReferencePlugin({
-      context: __dirname,
-      manifest: require('./dist/dll/react.manifest.json')
-    })
-  ]
-}
-```
-`DllReferencePlugin`去`manifest.json`文件中读取name字段的值，把值的内容作为在从全局变量中获取动态链接库内容时全局变量名，因此在`webpack.dll.config.js`文件中`DllPlugin`的参数`name`必须和`output.library`保持一致。
-最后，省工程的`dll`暴露出的是全局函数，要在入口文件中引入对应的`dll`文件：
-```html
-<script src="dll/react.dll.js">
-```
-
-#### htmlInlineChunkPlugin
-提前载入webpack加载代码
 
 ---
 ## resolve 模块解析
 resolve配置如何解析模块
 #### alias
 为指定模块创建别名：
-```javascript
+```js
 {
   resolve: {
     '@': path.resolve(__dirname, 'src')
@@ -140,12 +197,12 @@ resolve配置如何解析模块
 }
 ```
 在其他模块中可以更简洁的引用src下的模块：
-```javascript
+```js
 import someModule from '@/utils/***'
 ```
 #### modules
 配置webpack去哪些目录下寻找第三方模块，默认是只会去 `node_modules` 目录下寻找。 有时项目里会有一些模块会大量被其它模块依赖和导入，由于**其它模块的位置分布不定**，针对不同的文件都要去计算被导入模块文件的相对路径， 这个路径有时候会很长，就像这样  import '../../../components/button'  这时可以利用 `resolve.modules` 配置项优化，假如那些被大量导入的模块都在 `./src/components` 目录下，设置modules:
-```javascript
+```js
 {
   resolve: {
     modules: ['./src/componets', 'node_modules']
@@ -155,7 +212,7 @@ import someModule from '@/utils/***'
 通过```import 'button'```即可导入
 #### extensions
 导入不带后缀的文件时，webpack会自动带上后缀访问文件是否存在，后缀列表默认值为:
-```javascript
+```js
 {
   resolve: {
     extensions: ['.js', '.json']
@@ -185,7 +242,7 @@ import someModule from '@/utils/***'
   - webpack.HotModuleReplacementPlugin
 
 #### 跨域问题
-```javascript
+```js
 {
   devServer: {
     proxy: {
@@ -202,7 +259,7 @@ import someModule from '@/utils/***'
 请求到 `/api/user` 会被代理到请求 `http://localhost:/user`
 
 也可以借助 `before` 在 `webpack-dev-serve` 静态资源中间件处理之前, 拦截部分请求返回特定内容, 实现简单的数据 `mock`:
-```javascript
+```js
 {
   devServer: {
     proxy: {
@@ -240,4 +297,45 @@ webpack官方文档中介绍了几种取值，用于控制如何生成`source ma
 ---
 ## webpack打包优化(todo)
 #### 代码分割和懒加载
-commonsChunkPlugin 多entry公共代码抽取
+SplitChunksPlugin/commonsChunkPlugin 多entry公共代码抽取
+#### dllPlugin
+webpack官方推荐使用`SplitChunksPlugin`(`webpack 4` 之前是`CommonsChunkPlugin`)来分离第三方库，但是使用`SplitChunksPlugin`会有一个问题——每次构建的时候都会重新打包，而一般来说除了更新版本第三方库的代码很少变动，这无疑增加了webpack的打包时间，因此需要使用`DLLPlugin`(Dynamic Link Library)把复用性较高的第三方模块打包到动态链接库中，每次构建只重新打包业务代码。
+使用`dll`时，可以把构建过程分成`dll`构建过程和主构建过程，`DLLPlugin`需要配合`DLLReferencePlugin`使用。
+`dll`构建过程：
+```js
+// webpack.dll.confid.js
+{
+  output: {
+    filename: '[name].dll.js',
+    path: path.resolve(__dirname, 'dist/dll'),
+    library: '[name]_dll_[hash]'
+  },
+  plugins: [
+    new webpack.DllPlugin({
+      name: '[name]_dll_[hash]',
+      // 动态链接库的全局变量名称，需要和 output.library 中保持一致
+      // 该字段的值也就是输出的 manifest.json 文件 中 name 字段的值
+      path: path.join(__dirname, 'dist', '[name].manifest.json')
+      // 描述动态链接库的 manifest.json 文件输出时的文件名称
+    })
+  ]
+}
+```
+在主构建配置文件中使用动态库文件，通过`DllReferencePlugin`引用`dll`的`manifest`文件来把依赖的名称映射到模块的`id`上，之后在需要的时候通过内置的`webpack_require`来引入：
+```js
+{
+  plugins: [
+    new webpack.DllReferencePlugin({
+      context: __dirname,
+      manifest: require('./dist/dll/react.manifest.json')
+    })
+  ]
+}
+```
+`DllReferencePlugin`去`manifest.json`文件中读取name字段的值，把值的内容作为在从全局变量中获取动态链接库内容时全局变量名，因此在`webpack.dll.config.js`文件中`DllPlugin`的参数`name`必须和`output.library`保持一致。
+最后，省工程的`dll`暴露出的是全局函数，要在入口文件中引入对应的`dll`文件：
+```html
+<script src="dll/react.dll.js">
+```
+#### htmlInlineChunkPlugin
+提前载入webpack加载代码

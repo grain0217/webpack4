@@ -12,12 +12,13 @@ module.exports = {
   mode: 'development',
   // mode: 'production',
   entry: {
-    // home: './src/index.js',
-    main: './src/react.js'
+    main: './src/index.js',
+    // main: './src/react.js'
   },
   output: {
     // 打包后的文件名
     filename: 'bundle.[hash].js',
+    publicPath: '',
     path: path.resolve(__dirname, 'dist'), // 必须是一个绝对路径
   },
   resolve: {
@@ -151,7 +152,8 @@ module.exports = {
     }),
     new MiniCssExtractPlugin({
       // filename: '/css/main.css'
-      filename: 'main.css'
+      filename: '[name].css',
+      chunkFilename: '[id].css'
     }),
     // 自动加载模块，而不必到处 import 或 require
     new webpack.ProvidePlugin({
