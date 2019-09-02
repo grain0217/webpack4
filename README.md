@@ -108,10 +108,66 @@ webpack 4之前推荐`ExtractTextWebpackPlugin`将样式提取到单独的css文
 ---
 ## JS处理
 #### 转化ES 6
+关于 `@babel/preset-env`、`@babel/plugin-transform-runtime`区别：
+```js
+{
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        include: path.resolve(__dirname, 'src'),
+        exclude: '/node_modules',
+        use: [
+          {
+            loader: 'babel-loader',
+            options: {
+              presets: [
+                '@babel/preset-env',
+                '@babel/preset-react'
+              ],
+              plugins: [
+                '@babel/plugin-proposal-class-properties',
+                '@babel/plugin-transform-runtime',
+              ]
+            }
+          }
+        ],
+      }
+    ]
+  }
+```
 #### eslint做代码规范检查
+```js
+{
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        use: [
+          {
+            loader: 'eslint-loader',
+            options: {
+              enforce: 'pre', //
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
+
+// .eslintrc.json
+{
+  "parser": "babel-eslint",
+  "parserOptions": {
+    "ecmaVersion": 7,
+    "sourceType": "module"
+  }
+}
+```
 #### 全局变量引入问题
 #### noParse
-使 webpack 忽略对部分`没有采用模块化`（即）的文件进行依赖的递归解析处理，例如jQuery、lodash等体积大而又没有其他包依赖的库：
+使 webpack 忽略对部分`没有采用模块化`（即不依赖其他模块）的文件进行依赖的递归解析处理，例如jQuery、lodash等体积大而又没有其他包依赖的库：
 ```js
 {
   module: {
@@ -201,7 +257,7 @@ resolve配置如何解析模块
 import someModule from '@/utils/***'
 ```
 #### modules
-配置webpack去哪些目录下寻找第三方模块，默认是只会去 `node_modules` 目录下寻找。 有时项目里会有一些模块会大量被其它模块依赖和导入，由于**其它模块的位置分布不定**，针对不同的文件都要去计算被导入模块文件的相对路径， 这个路径有时候会很长，就像这样  import '../../../components/button'  这时可以利用 `resolve.modules` 配置项优化，假如那些被大量导入的模块都在 `./src/components` 目录下，设置modules:
+配置webpack去哪些目录下寻找第三方模块，默认是只会去 `node_modules` 目录下寻找。 有时项目里会有一些模块会大量被其它模块依赖和导入，由于**其它模块的位置分布不定**，针对不同的文件都要去计算被导入模块文件的相对路径， 这个路径有时候会很长，就像这样 ``` import '../../../components/button' ``` 这时可以利用 `resolve.modules` 配置项优化，假如那些被大量导入的模块都在 `./src/components` 目录下，设置modules:
 ```js
 {
   resolve: {
@@ -339,3 +395,27 @@ webpack官方推荐使用`SplitChunksPlugin`(`webpack 4` 之前是`CommonsChunkP
 ```
 #### htmlInlineChunkPlugin
 提前载入webpack加载代码
+#### happypack
+由于运行在 `Node.js` 之上的 webpack 是单线程的，想要让webpack同一时间处理多个任务，发挥多核CPU的威力，需要借助`happypack`，它把任务分解给多个子进程去并发执行，子进程处理完后再把结果发送给主进程。
+```js
+// const Happypack = require('happypack')
+{
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        use: 'Happypack/loader?id=js'
+      }
+    ]
+  },
+  plugins: [
+    new Happypack({
+      id: 'js',
+      use: [
+        // module js匹配的use配置
+      ]
+    })
+  ]
+}
+```
+默认开启3个进程；其他模块(样式、文件)配置同理

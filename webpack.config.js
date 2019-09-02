@@ -6,8 +6,8 @@ const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin')
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
+const Happypack = require('happypack')
 
-console.log(path.resolve(__dirname))
 module.exports = {
   mode: 'development',
   // mode: 'production',
@@ -69,27 +69,28 @@ module.exports = {
         test: /\.js$/,
         include: path.resolve(__dirname, 'src'),
         exclude: '/node_modules',
-        use: [
-          {
-            loader: 'babel-loader',
-            options: {
-              presets: [
-                '@babel/preset-env',
-                '@babel/preset-react'
-              ],
-              plugins: [
-                '@babel/plugin-proposal-class-properties',
-                '@babel/plugin-transform-runtime',
-              ]
-            }
-          },
-          {
-            loader: 'eslint-loader',
-            options: {
-              enforce: 'pre', //
-            }
-          }
-        ],
+        use: 'Happypack/loader?id=js',
+        // use: [
+        //   {
+        //     loader: 'babel-loader',
+        //     options: {
+        //       presets: [
+        //         '@babel/preset-env',
+        //         '@babel/preset-react'
+        //       ],
+        //       plugins: [
+        //         '@babel/plugin-proposal-class-properties',
+        //         '@babel/plugin-transform-runtime',
+        //       ]
+        //     }
+        //   },
+        //   {
+        //     loader: 'eslint-loader',
+        //     options: {
+        //       enforce: 'pre', //
+        //     }
+        //   }
+        // ],
       },
       {
         test: /\.css$/,
@@ -170,6 +171,30 @@ module.exports = {
     new webpack.DllReferencePlugin({
       context: __dirname,
       manifest: require('./dist/dll/react.manifest.json')
+    }),
+    new Happypack({
+      id: 'js',
+      use: [
+        {
+          loader: 'babel-loader',
+          options: {
+            presets: [
+              '@babel/preset-env',
+              '@babel/preset-react'
+            ],
+            plugins: [
+              '@babel/plugin-proposal-class-properties',
+              '@babel/plugin-transform-runtime',
+            ]
+          }
+        },
+        {
+          loader: 'eslint-loader',
+          options: {
+            enforce: 'pre', //
+          }
+        }
+      ]
     })
   ]
 }
