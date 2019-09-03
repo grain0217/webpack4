@@ -351,15 +351,43 @@ webpack官方文档中介绍了几种取值，用于控制如何生成`source ma
   不产生列,不产生map，集成在打包后的文件中
 
 ---
-## webpack打包优化(todo)
+## webpack打包优化(doing)
+#### tree-shaking(todo)
 #### 代码分割和懒加载
-SplitChunksPlugin/commonsChunkPlugin 多entry公共代码抽取
+webpack 4引入了`SplitChunksPlugin`来取代`CommonsChunkPlugin`来分割公共依赖：
+```js
+{
+  optimization: {
+  // 只在 mode: production 下有效
+    splitChunks: {  // 分割的代码块
+      chunks: 'all',
+      cacheGroups: {  // 缓存组
+        common: {   // 自定义公共模块
+          name: 'commons',
+          chunks: 'initial',  // 表示从哪些chunks里面抽取代码
+          minSize: 0, // 默认30000，如果没有修改minSize属性且被公用的代码size小于30KB的话，它就不会分割成一个单独的文件
+          minChunks: 2, // 表示被引用次数，默认为1
+        },
+        // 这里要注意externals配置的第三方模块不会被打包
+        vendor: {   // 第三方模块
+          name: 'vendor',
+          priority: 10,  // 默认缓存组优先级为负数，默认自定义缓存组优先级为0
+          test: /node_modules/,
+          chunks: 'initial',
+          minSize: 0,
+          minChunks: 2,
+        }
+      }
+    }
+}
+```
 #### dllPlugin
-webpack官方推荐使用`SplitChunksPlugin`(`webpack 4` 之前是`CommonsChunkPlugin`)来分离第三方库，但是使用`SplitChunksPlugin`会有一个问题——每次构建的时候都会重新打包，而一般来说除了更新版本第三方库的代码很少变动，这无疑增加了webpack的打包时间，因此需要使用`DLLPlugin`(Dynamic Link Library)把复用性较高的第三方模块打包到动态链接库中，每次构建只重新打包业务代码。
+使用`SplitChunksPlugin`会有一个问题 —— 每次构建的时候都会重新打包，而一般来说第三方库的代码除了版本更新很少变动，这无疑增加了打包时间，因此需要使用`DLLPlugin`(Dynamic Link Library)把复用性较高的第三方模块打包到动态链接库中。
+
 使用`dll`时，可以把构建过程分成`dll`构建过程和主构建过程，`DLLPlugin`需要配合`DLLReferencePlugin`使用。
 `dll`构建过程：
 ```js
-// webpack.dll.confid.js
+// webpack.dll.config.js
 {
   output: {
     filename: '[name].dll.js',
