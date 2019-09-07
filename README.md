@@ -353,7 +353,13 @@ webpack官方文档中介绍了几种取值，用于控制如何生成`source ma
 ---
 ## webpack打包优化(doing)
 #### tree-shaking(todo)
-#### 代码分割和懒加载
+#### 懒加载
+```js
+{
+  
+}
+```
+#### 代码分割
 webpack 4引入了`SplitChunksPlugin`来取代`CommonsChunkPlugin`来分割公共依赖：
 ```js
 {

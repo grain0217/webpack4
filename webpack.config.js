@@ -14,8 +14,11 @@ module.exports = {
   entry: {
     // main: './src/index.js',
     // main: './src/react.js'
-    index: './src/public/index.js',
-    other: './src/public/other.js'
+    // splitChunk
+    // index: './src/public/index.js',
+    // other: './src/public/other.js'
+    // lazy-load
+    lazy: './src/lazyLoad/index.js'
   },
   output: {
     // 打包后的文件名
