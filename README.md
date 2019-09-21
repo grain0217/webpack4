@@ -294,9 +294,24 @@ import someModule from '@/utils/***'
 - 在浏览器中显示编译错误
 
 #### 模块热更新
-  - hot: true
-  - webpack.HotModuleReplacementPlugin
+```js
+// webpack.config
+{
+  devServer: {
+    hot: true,
+  },
+  plugins: [
+    // 当开启 HMR 的时候使用该插件会打印更新模块的相对路径
+    new webpack.NamedModulesPlugin(),
+    new webpack.HotModuleReplacementPlugin()
+  ]
+}
 
+// 业务代码中，增加热更新处理
+if (module.hot) {
+  module.hot.accept()
+}
+```
 #### 跨域问题
 ```js
 {
@@ -356,7 +371,7 @@ webpack官方文档中介绍了几种取值，用于控制如何生成`source ma
 #### 懒加载
 ```js
 {
-  
+  import(某个模块).then(() => {})
 }
 ```
 #### 代码分割

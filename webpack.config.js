@@ -10,7 +10,7 @@ const Happypack = require('happypack')
 
 module.exports = {
   // mode: 'development',
-  mode: 'production',
+  mode: 'development',
   entry: {
     // main: './src/index.js',
     // main: './src/react.js'
@@ -40,6 +40,7 @@ module.exports = {
   devServer: {
     port: 3000,
     progress: true,
+    hot: true,
     // publicPath: '',
     contentBase: './dist',
     overlay: true,
@@ -221,5 +222,7 @@ module.exports = {
     //     }
     //   ]
     // })
+    new webpack.NamedModulesPlugin(),
+    new webpack.HotModuleReplacementPlugin()
   ]
 }
