@@ -12,20 +12,20 @@ module.exports = {
   // mode: 'development',
   mode: 'development',
   entry: {
-    // main: './src/index.js',
+    main: './src/index.js',
     // main: './src/react.js'
     // splitChunk
     // index: './src/public/index.js',
     // other: './src/public/other.js'
     // lazy-load
-    lazy: './src/lazyLoad/index.js'
+    // lazy: './src/lazyLoad/index.js'
   },
   output: {
     // 打包后的文件名
     // filename: 'bundle.[hash].js',
     filename: '[name].js',
-    publicPath: '',
-    path: path.resolve(__dirname, 'dist'), // 必须是一个绝对路径
+    // publicPath: 'assets', // 为项目中的所有资源指定一个基础路径（前缀）
+    path: path.resolve(__dirname, 'dist'), // 指定构建结果的输出目录，必须是一个绝对路径
   },
   resolve: {
     alias: {
@@ -41,8 +41,14 @@ module.exports = {
     port: 3000,
     progress: true,
     hot: true,
-    // publicPath: '',
-    contentBase: './dist',
+    contentBase: path.join(__dirname, 'dist'),
+    // publicPath: 'http://localhost:3000/',
+    // historyApiFallback: true, 默认关闭
+    historyApiFallback: {
+      rewrites: [
+        { from: /^home$/, to: '/' }
+      ]
+    },
     overlay: true,
     compress: true,
     proxy: {

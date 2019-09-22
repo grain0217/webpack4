@@ -9,26 +9,25 @@
 
 ---
 ## output
-#### path
-一个对应打包输出的绝对路径
-#### filename
-- 对于单入口，filename 是一个静态名称
-- 当通过多个入口、代码拆分或各种插件创建多个bundle时，可以通过`name|chunkId|hash|chunkHash`为每个bundle命名
 ```js
 {
-  output: {
-    filename: [name].bundle.js
-  }
+  /* 对于单入口，filename 是一个静态名称
+    当通过多个入口、代码拆分或各种插件创建多个bundle时，可以通过`name|chunkId|hash|chunkHash`为每个bundle命名*/
+  filename: [name].bundle.js,
+  output: '', // 指定构建结果的输出目录，必须是一个绝对路径
+  /* publicPath 为项目中的所有资源指定一个基础路径
+  相当于为静态资源路径添加前缀的作用，在生产中可以配置CDN地址
+  静态资源最终引用路径 = output.publicPath + 资源loader或插件等配置路径 */
+  publicPath: '',  // <script src="publicPath + name.js">
 }
 ```
-#### publicPath
-指定项目打包生成的**引用**css，js，img等资源时的基础路径，相当于为静态资源路径添加前缀的作用
-一般在开发时使用`dist`，在生产中可以配置CDN地址
 
 ---
 ## 样式处理
-#### style-loader
-将css-loader打包好的css代码以`<style>`标签的形式插入到html文件中：
+#### style-loader 和 css-loader
+`css-loader` 负责解析CSS代码，主要是为了处理CSS中的依赖，例如 `@import` 和 `url()` 等引用外部文件的声明。
+
+而 `style-loader` 将 `css-loader` 解析的结果以`<style>`标签的形式插入到html文件中使CSS代码生效。
 ```js
 {
   module: {
@@ -52,10 +51,8 @@
   }
 }
 ```
-#### css-loader
-使你能够使用类似`@import`和`url(…)`的方法实现引入CSS代码块的功能
 #### sass-loader
-处理sass文件：
+在上述支持CSS的基础上，通常在开发中会使用 `Less/Sass` 等预处理器，webpack可以通过添加相应的loader来支持，以Sass为例：
 ```js
 {
   module: {
@@ -107,7 +104,9 @@ webpack 4之前推荐`ExtractTextWebpackPlugin`将样式提取到单独的css文
 
 ---
 ## JS处理
-#### 转化ES 6
+#### babel
+`babel` 是一个让我们能够使用 `ES` 新特新的JavaScript编译工具，我们可以在 `webpack` 中配置它以便使用 `ES 6`、`ES 7 ` 标准来编写JavaScript代码。
+
 关于 `@babel/preset-env`、`@babel/plugin-transform-runtime`区别：
 ```js
 {
@@ -136,6 +135,7 @@ webpack 4之前推荐`ExtractTextWebpackPlugin`将样式提取到单独的css文
     ]
   }
 ```
+`babel` 的相关配置也可以在目录下使用`.babelrc` 文件来处理。
 #### eslint做代码规范检查
 ```js
 {
@@ -186,9 +186,9 @@ background url css-loader 支持
 借助html-with-image-loader
 
 ---
-## 开发中使用的插件
+## 插件
 #### HtmlWebpackPlugin
-自动生成一个 html 文件，服务于webpack bundle，并且自动引用相关的 assets 文件(如 css, js)：
+如果使用 `hash` 命名文件，会经常发生变化，通过 `HtmlWebpackPlugin` 将 `HTML` 中资源的引用路径和构建结果关联起来：：
 ```js
 // const HtmlWebpackPlugin = require('html-webpack-plugin')
 
@@ -228,8 +228,28 @@ background url css-loader 支持
 ```
 #### copyWebpckPlugin
 拷贝部分文件或指定整个目录到build路径下
+```js
+// const CopyWebpackPlugin = require('copy-webpack-plugin')
+{
+  plugins: [
+    new CopyWebpackPlugin([
+      {
+        from: path.resolve(__dirname, 'README.md'),
+        to: path.resolve(__dirname, 'dist')
+      }
+    ]),
+  ]
+}
+```
 #### bannerPlugin
 为每个 chunk 文件头部添加 版权声明
+```js
+{
+  plugins: [
+    new webpack.BannerPlugin('author: grain0217'),
+  ]
+}
+```
 #### webpack.IgnorePlugin
 用于指定忽略某些特定模块，使webpack不把这些指定模块打包进去，如第三方库`moment`，打包的时候关于多国语言的配置文件`locale`会被引入，导致打包文件很大：
 ```js
@@ -283,16 +303,34 @@ import someModule from '@/utils/***'
 
 ---
 ## dev-server搭建本地开发环境
-#### contentbase
-指定html页面所在的目录，默认指向项目的根目录
-#### publicPath
+以上，完成了多种文件类型的 `webpack` 配置，可以使用 `webpack-dev-server ` 在本地开启一个简单的静态服务来进行开发。
+```js
+// package.json
+// npm install webpack-dev-server
+{
+  "scripts": {
+    "dev": "webpack-dev-server"
+  }
+}
 
-- live reloading
-- 路径重定向
-- historyApiFallback
-- https
-- 在浏览器中显示编译错误
-
+```
+一些常用配置：
+```js
+{
+  devServer: {
+    port: 3000, // 指定静态服务器的端口 默认是8080
+    contentbase: path.join(__dirname, 'dist'), // 告诉静态资源服务器从哪个目录中提供内容
+    // 如果设置了 HMR， publicPath 必须为完整的URL
+    publicPath: '', // 由于webpack-dev-server打包的内容是放在内存中的，这些打包后的静态资源对外的暴露的根目录就是publicPath，在浏览器中访问静态资源时也应该带上publicPath路径
+    // historyApiFallback 为true 时，任意的404响应都被替代为index.html
+    historyApiFallback: {
+      rewrites: [
+        { from: /^home$/, to: '/' }
+      ]
+    }
+  }
+}
+```
 #### 模块热更新
 ```js
 // webpack.config
@@ -312,7 +350,7 @@ if (module.hot) {
   module.hot.accept()
 }
 ```
-#### 跨域问题
+#### 代理
 ```js
 {
   devServer: {
