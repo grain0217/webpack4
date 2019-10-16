@@ -82,7 +82,7 @@ module.exports = {
         test: /\.js$/,
         include: path.resolve(__dirname, 'src'),
         exclude: '/node_modules',
-        use: 'Happypack/loader?id=js',
+        // use: 'Happypack/loader?id=js',
         use: [
           {
             loader: 'babel-loader',
