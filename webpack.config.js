@@ -6,35 +6,49 @@ const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin')
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
+const Happypack = require('happypack')
 
-console.log(path.resolve(__dirname))
 module.exports = {
+  // mode: 'development',
   mode: 'development',
-  // mode: 'production',
   entry: {
-    // home: './src/index.js',
-    main: './src/react.js'
+    main: './src/index.js',
+    // main: './src/react.js'
+    // splitChunk
+    // index: './src/public/index.js',
+    // other: './src/public/other.js'
+    // lazy-load
+    // lazy: './src/lazyLoad/index.js'
   },
   output: {
     // 打包后的文件名
-    filename: 'bundle.[hash].js',
-    path: path.resolve(__dirname, 'dist'), // 必须是一个绝对路径
+    // filename: 'bundle.[hash].js',
+    filename: '[name].js',
+    // publicPath: 'assets', // 为项目中的所有资源指定一个基础路径（前缀）
+    path: path.resolve(__dirname, 'dist'), // 指定构建结果的输出目录，必须是一个绝对路径
   },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src')
     }
   },
-  externals: {
-    // 如项目中有模块已经来源于外部依赖(cdn等)，不需要将这些import的包打包到bundle中
-    jquery: '$'
-  },
+  // externals: {
+  //   // 如项目中有模块已经来源于外部依赖(cdn等)，不需要将这些import的包打包到bundle中
+  //   jquery: '$'
+  // },
   devtool: 'source-map',
   devServer: {
     port: 3000,
     progress: true,
-    // publicPath: '',
-    contentBase: './dist',
+    hot: true,
+    contentBase: path.join(__dirname, 'dist'),
+    // publicPath: 'http://localhost:3000/',
+    // historyApiFallback: true, 默认关闭
+    historyApiFallback: {
+      rewrites: [
+        { from: /^home$/, to: '/' }
+      ]
+    },
     overlay: true,
     compress: true,
     proxy: {
@@ -68,6 +82,7 @@ module.exports = {
         test: /\.js$/,
         include: path.resolve(__dirname, 'src'),
         exclude: '/node_modules',
+        use: 'Happypack/loader?id=js',
         use: [
           {
             loader: 'babel-loader',
@@ -112,15 +127,43 @@ module.exports = {
         use: [
           MiniCssExtractPlugin.loader,
           'css-loader',
-          'postcss-loader',
+          {
+            loader: 'postcss-loader',
+            options: {
+              sourceMap: true,
+              ident: 'postcss',
+              plugins: loader => [
+                require('autoprefixer')()
+              ]
+            },
+          },
           'sass-loader',
         ]
       }
     ]
   },
   optimization: {
-    // 只在production模式下有效
+    // 只在 mode: production 下有效
     // sourceMap与minimizer冲突，导致sourceMap无效
+    splitChunks: {  // 分割的代码块
+      chunks: 'all',
+      cacheGroups: {  // 缓存组
+        common: {   // 公共模块
+          name: 'commons',
+          chunks: 'initial',  // 表示从哪些chunks里面抽取代码
+          minSize: 0, // 默认30000，如果没有修改minSize属性且被公用的代码size小于30KB的话，它就不会分割成一个单独的文件
+          minChunks: 2, // 表示被引用次数，默认为1
+        },
+        vendor: {   // 第三方模块
+          name: 'vendor',
+          priority: 10,  // 默认缓存组优先级为负数，默认自定义缓存组优先级为0
+          test: /node_modules/,
+          chunks: 'initial',
+          minSize: 0,
+          minChunks: 2,
+        }
+      }
+    },
     // minimizer: [
     //   new UglifyJsPlugin({
     //     // parallel: true,
@@ -151,23 +194,50 @@ module.exports = {
     }),
     new MiniCssExtractPlugin({
       // filename: '/css/main.css'
-      filename: 'main.css'
+      filename: '[name].css',
+      chunkFilename: '[id].css'
     }),
     // 自动加载模块，而不必到处 import 或 require
-    new webpack.ProvidePlugin({
-      $: 'jquery'
-    }),
-    // new CleanWebpackPlugin(),
-    new CopyWebpackPlugin([
-      {
-        from: path.resolve(__dirname, 'README.md'),
-        to: path.resolve(__dirname, 'dist')
-      }
-    ]),
+    // new webpack.ProvidePlugin({
+    //   $: 'jquery'
+    // }),
+    new CleanWebpackPlugin(),
+    // new CopyWebpackPlugin([
+    //   {
+    //     from: path.resolve(__dirname, 'README.md'),
+    //     to: path.resolve(__dirname, 'dist')
+    //   }
+    // ]),
     new webpack.BannerPlugin('author: grain0217'),
-    new webpack.DllReferencePlugin({
-      context: __dirname,
-      manifest: require('./dist/dll/react.manifest.json')
-    })
+    // new webpack.DllReferencePlugin({
+    //   context: __dirname,
+    //   manifest: require('./dist/dll/react.manifest.json')
+    // }),
+    // new Happypack({
+    //   id: 'js',
+    //   use: [
+    //     {
+    //       loader: 'babel-loader',
+    //       options: {
+    //         presets: [
+    //           '@babel/preset-env',
+    //           '@babel/preset-react'
+    //         ],
+    //         plugins: [
+    //           '@babel/plugin-proposal-class-properties',
+    //           '@babel/plugin-transform-runtime',
+    //         ]
+    //       }
+    //     },
+    //     {
+    //       loader: 'eslint-loader',
+    //       options: {
+    //         enforce: 'pre', //
+    //       }
+    //     }
+    //   ]
+    // })
+    new webpack.NamedModulesPlugin(),
+    new webpack.HotModuleReplacementPlugin()
   ]
 }

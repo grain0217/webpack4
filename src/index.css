@@ -1,4 +1,4 @@
-@import './a.css';
+/* @import './a.sass'; */
 
 body {
   margin: 100px;
@@ -7,4 +7,7 @@ body {
   /* transform: rotate(90deg); */
   /* css-loader支持 */
   background-image: url('./assets/icon.png');
+}
+body h4 {
+  transform: translateX(10px)
 }
