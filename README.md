@@ -51,6 +51,7 @@
   }
 }
 ```
+
 #### sass-loader
 在上述支持CSS的基础上，通常在开发中会使用 `Less/Sass` 等**预处理器**，webpack可以通过添加相应的loader来支持，以Sass为例：
 ```js
@@ -65,6 +66,7 @@
   }
 }
 ```
+
 #### PostCss
 Sass和Less都是CSS**预处理器**，用于增强CSS语法。而PostCSS可以对CSS进行**后处理**，所谓的**后处理**就是对**原生的CSS**进行一定的修改增强：
 - autoprefixer 补充浏览器前缀
@@ -88,6 +90,7 @@ Sass和Less都是CSS**预处理器**，用于增强CSS语法。而PostCSS可以�
   }
 }
 ```
+
 #### MiniCssExtractPlugin
 webpack 4之前推荐`ExtractTextWebpackPlugin`将样式提取到单独的css文件，在webpack 4中已经被`MiniCssExtractPlugin`替代：
 ```js
@@ -154,6 +157,7 @@ webpack 4之前推荐`ExtractTextWebpackPlugin`将样式提取到单独的css文
   }
 ```
 `babel` 的相关配置也可以在目录下使用`.babelrc` 文件来处理。
+
 #### eslint做代码规范检查
 ```js
 {
@@ -183,7 +187,9 @@ webpack 4之前推荐`ExtractTextWebpackPlugin`将样式提取到单独的css文
   }
 }
 ```
+
 #### 全局变量引入问题
+
 #### noParse
 使 webpack **忽略**对部分**没有采用模块化**（即不依赖其他模块）的文件进行依赖的递归解析处理，例如`jQuery`、`lodash`等体积大而又没有其他包依赖的库：
 ```js
@@ -198,15 +204,17 @@ webpack 4之前推荐`ExtractTextWebpackPlugin`将样式提取到单独的css文
 ## 图片处理
 #### js import
 需要 file-loader/url-loader
+
 #### css
 background url css-loader 支持 
+
 #### 内联
 借助html-with-image-loader
 
 ---
 ## 插件
 #### HtmlWebpackPlugin
-如果使用 `hash` 命名文件，会经常发生变化，通过 `HtmlWebpackPlugin` 将HTML中资源的引用路径和构建结果关联起来：：
+如果使用 `hash` 命名文件，打包出来的文件名不是固定的，可以通过 `HtmlWebpackPlugin` 将HTML中资源的引用路径和打包文件自动关联起来：
 ```js
 // const HtmlWebpackPlugin = require('html-webpack-plugin')
 
@@ -234,6 +242,7 @@ background url css-loader 支持
   ]
 }
 ```
+
 #### cleanWebpackPlugin
 用于在下一次打包时清除之前打包的文件：
 ```js
@@ -244,6 +253,7 @@ background url css-loader 支持
   ]
 }
 ```
+
 #### copyWebpckPlugin
 拷贝部分文件或指定整个目录到`build`路径下
 ```js
@@ -259,6 +269,7 @@ background url css-loader 支持
   ]
 }
 ```
+
 #### bannerPlugin
 为每个 `chunk` 文件头部添加 版权声明
 ```js
@@ -268,6 +279,7 @@ background url css-loader 支持
   ]
 }
 ```
+
 #### webpack.IgnorePlugin
 用于指定忽略某些特定模块，使webpack不把这些指定模块打包进去，如第三方库`moment`，打包的时候关于多国语言的配置文件`locale`会被引入，导致打包文件很大：
 ```js
@@ -281,6 +293,7 @@ background url css-loader 支持
 ---
 ## resolve 模块解析
 配置如何解析模块
+
 #### alias
 为指定模块创建别名：
 ```js
@@ -294,8 +307,15 @@ background url css-loader 支持
 ```js
 import someModule from '@/utils/***'
 ```
+
 #### modules
-配置webpack去哪些目录下寻找第三方模块，默认是只会去 `node_modules` 目录下寻找。 有时项目里会有一些模块会大量被其它模块依赖和导入，由于**其它模块的位置分布不定**，针对不同的文件都要去计算被导入模块文件的相对路径， 这个路径有时候会很长，就像这样 ``` import '../../../components/button' ``` 这时可以利用 `resolve.modules` 配置项优化，假如那些被大量导入的模块都在 `./src/components` 目录下，设置modules:
+配置webpack去哪些目录下寻找第三方模块，默认是只会去 `node_modules` 目录下寻找。 
+
+有的时候项目里会有一些模块会大量被其它模块依赖和导入，由于**其它模块的位置分布不定**，针对不同的文件都要去计算被导入模块文件的相对路径， 这个路径有时候会很长，比如一个`button`组件在某个组件中的导入方式可能如下：
+``` 
+import '../../../components/button'
+```
+这时可以利用 `resolve.modules` 配置项优化，假如那些被大量导入的模块都在 `./src/components` 目录下，可以设置modules:
 ```js
 {
   resolve: {
@@ -303,7 +323,12 @@ import someModule from '@/utils/***'
   }
 }
 ```
-这样，在组件或模块中，通过```import 'button'```即可导入`button`模块。
+在需要使用它的组件或模块中，通过
+```
+import 'button'
+```
+即可导入`button`模块。
+
 #### extensions
 导入不带后缀的文件时，webpack会自动带上后缀访问文件是否存在，后缀列表默认值为:
 ```js
@@ -349,6 +374,7 @@ import someModule from '@/utils/***'
   }
 }
 ```
+
 #### 模块热更新
 ```js
 // webpack.config
@@ -368,6 +394,7 @@ if (module.hot) {
   module.hot.accept()
 }
 ```
+
 #### 代理
 ```js
 {
@@ -424,41 +451,81 @@ webpack官方文档中介绍了几种取值，用于控制如何生成`source ma
 ---
 ## webpack打包优化(doing)
 #### tree-shaking(todo)
+
 #### 懒加载
 ```js
 {
   import(某个模块).then(() => {})
 }
 ```
-#### 代码分割
-webpack 4引入了`SplitChunksPlugin`来取代`CommonsChunkPlugin`来分割公共依赖：
+
+#### 代码分割(实用)
+webpack 4引入了`SplitChunksPlugin`来取代`CommonsChunkPlugin`，用来将业务代码与第三方公共依赖分离开，实现减少代码冗余，以及基于浏览器缓提高前端性能。
+
+production 模式下默认开启，默认配置如下：
 ```js
 {
   optimization: {
-  // 只在 mode: production 下有效
-    splitChunks: {  // 分割的代码块
+    splitChunks: {
+      chunks: "async",  // 表示从哪些chunks里面抽取代码，'initial' | 'async' | 'all',
+      minSize: 30000, // 被公用的代码压缩之前的体积小于30KB的话，它就不会被抽离成一个单独的文件
+      minChunks: 1, // 表示被引用次数
+      maxAsyncRequests: 5,
+      maxInitialRequests: 3,
+      automaticNameDelimiter: '~',node_modules/
+      name: true,
+      cacheGroups: {
+        vendors: {
+          test: /[\\/]node_modules[\\/]/,
+          priority: -10,   // 模块被不同的缓存组策略命中，优先级高策略生效。默认缓存组优先级为负数，默认自定义缓存组优先级为0
+        },
+        default: {
+          minChunks: 2,
+          priority: -20,
+          reuseExistingChunk: true
+        }
+      }
+    }
+  }
+}
+```
+ 对于普通的应用，Webpack 4 内置的规则就足够了。
+```js
+{
+  optimization: {
+    splitChunks: {
       chunks: 'all',
+      // initial 模式下会把异步和非异步模块分开打包。而 all 会把异步和非异步同时进行打包。也就是说moduleA在indexA中异步引入，indexB中同步引入， initial 下moduleA会出现在两个打包块中，而 all 只会出现一个。
       cacheGroups: {  // 缓存组
         common: {   // 自定义公共模块
           name: 'commons',
-          chunks: 'initial',  // 表示从哪些chunks里面抽取代码
-          minSize: 0, // 默认30000，如果没有修改minSize属性且被公用的代码size小于30KB的话，它就不会分割成一个单独的文件
-          minChunks: 2, // 表示被引用次数，默认为1
+          chunks: 'initial', 
+          minSize: 0,
+          minChunks: 2,
         },
         // 这里要注意externals配置的第三方模块不会被打包
-        vendor: {   // 第三方模块
+        vendor: {   // 把所有 node_modules 中引入的模块打包成一个文件
           name: 'vendor',
-          priority: 10,  // 默认缓存组优先级为负数，默认自定义缓存组优先级为0
-          test: /node_modules/,
-          chunks: 'initial',
+          priority: 10,
+          test: /[\\/]node_modules[\\/]/,
+          chunks: 'all',
           minSize: 0,
           minChunks: 2,
         }
       }
     }
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: './src/index.html',
+      chunks:['vendor', 'common'], // 引入chunks时，加入对应的模块
+      filename: 'index.html',
+    })
+  ]
 }
 ```
-#### dllPlugin
+
+#### dllPlugin(实用)
 使用`SplitChunksPlugin`会有一个问题 —— 每次构建的时候都会重新打包，而一般来说第三方库的代码除了版本更新很少变动，这无疑增加了打包时间，因此需要使用`DLLPlugin`(Dynamic Link Library)把复用性较高的第三方模块打包到动态链接库中。
 
 使用`dll`时，可以把构建过程分成`dll`构建过程和主构建过程，`DLLPlugin`需要配合`DLLReferencePlugin`使用。
@@ -500,6 +567,7 @@ webpack 4引入了`SplitChunksPlugin`来取代`CommonsChunkPlugin`来分割公�
 ```
 #### htmlInlineChunkPlugin
 提前载入webpack加载代码
+
 #### happypack
 由于运行在 `Node.js` 之上的 webpack 是单线程的，想要让webpack同一时间处理多个任务，发挥多核CPU的威力，需要借助`happypack`，它把任务分解给多个子进程去并发执行，子进程处理完后再把结果发送给主进程。
 ```js
